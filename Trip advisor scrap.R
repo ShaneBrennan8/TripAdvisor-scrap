@@ -138,222 +138,222 @@ table(reviews_raw$ratings)
 table(reviews_raw$location)
       
       
-      # Create a corpus from the body text.
-      ### Create a corpus from the body text and clean
-      reviews_corpus = Corpus(VectorSource(reviews_raw$body))
+# Create a corpus from the body text.
+### Create a corpus from the body text and clean
+reviews_corpus = Corpus(VectorSource(reviews_raw$body))
       
-      # Have a little look at section the corpus
-      inspect(reviews_corpus[5:10])
+# Have a little look at section the corpus
+inspect(reviews_corpus[5:10])
       
-      # Change the text to lower case & Saves to variable corpus_clean
-      corpus_clean <- tm_map(reviews_corpus, content_transformer(tolower)) 
-      # Cleaning the data
-      corpus_clean <- tm_map(reviews_corpus, content_transformer(tolower)) 
+# Change the text to lower case & Saves to variable corpus_clean
+corpus_clean <- tm_map(reviews_corpus, content_transformer(tolower)) 
+# Cleaning the data
+corpus_clean <- tm_map(reviews_corpus, content_transformer(tolower)) 
       
-      corpus_clean = tm_map(corpus_clean, removeNumbers)              # removes numbers
-      corpus_clean = tm_map(corpus_clean, removeWords, stopwords())   # remove stop words
-      reviews_corpus_test = corpus_clean[741:1060]
-      prop.table(table(reviews_raw_train$ratings))
-      prop.table(table(reviews_raw_test$ratings))
+corpus_clean = tm_map(corpus_clean, removeNumbers)              # removes numbers
+corpus_clean = tm_map(corpus_clean, removeWords, stopwords())   # remove stop words
+reviews_corpus_test = corpus_clean[741:1060]
+prop.table(table(reviews_raw_train$ratings))
+prop.table(table(reviews_raw_test$ratings))
       
-      #creating test and train portions of the data
-      prop.table(table(reviews_raw_train$location))
-      prop.table(table(reviews_raw_test$location))
-      # Here the locations distribution were checked out of matter of interest. 
-      # This section was left out because there wasn't enough training samples in the dataset to train the model
-      #prop.table(table(reviews_raw_train$location))
-      #prop.table(table(reviews_raw_test$location))
+#creating test and train portions of the data
+prop.table(table(reviews_raw_train$location))
+prop.table(table(reviews_raw_test$location))
+# Here the locations distribution were checked out of matter of interest. 
+# This section was left out because there wasn't enough training samples in the dataset to train the model
+# prop.table(table(reviews_raw_train$location))
+# prop.table(table(reviews_raw_test$location))
       
-      # Both rating training sets have approximately 63% 5 stars, 25% 4 stars, 7.5% 3 stars, 2% 2 stars, 4% 1 stars
-      # This means that we have evenly distributed the factors or star reviews
+# Both rating training sets have approximately 63% 5 stars, 25% 4 stars, 7.5% 3 stars, 2% 2 stars, 4% 1 stars
+# This means that we have evenly distributed the factors or star reviews
       
-      # In terms of the location I was not able to evenly distribute it over the training and test data 
-      # so I decided to omit it - 16 factors proved to be too much
-      
-      
-      # A word cloud can be used to visually depict the frequency at which words appear in text data
-      # Here I've added colour to denote the most occurring words
-      
-      wordcloud(ratings_corpus_train, min.freq = 10, random.order = F, colors = c("chartreuse", "cornflowerblue", "darkorange"))
-      wordcloud(reviews_corpus_train, min.freq = 10, random.order = F, colors = c("chartreuse", "cornflowerblue", "darkorange"))
-      
-      # Lets look at the word clouds separated based on if they are 1 or 5 bubbles
-      
-      reviews_train = apply(reviews_train, MARGIN = 2, convert_counts)
-      reviews_test  = apply(reviews_test, MARGIN = 2, convert_counts)
-      
-      ### Obtaining results
-      # load library for Naive Bayes
-      library (e1071)
-      
-      reviews_classifier = naiveBayes(reviews_train, reviews_raw_train$ratings)
-      reviews_test_pred = predict(reviews_classifier, reviews_test)
+# In terms of the location I was not able to evenly distribute it over the training and test data 
+# so I decided to omit it - 16 factors proved to be too much
       
       
-      # results
-      install.packages("gmodels")
-      library(gmodels)
-      CrossTable(reviews_test_pred, reviews_raw_test$ratings, prop.chisq = F, prop.t = F, dnn = c('predicted', 'actual'))
+# A word cloud can be used to visually depict the frequency at which words appear in text data
+# Here I've added colour to denote the most occurring words
       
-      ### Below we apply the random forest to our dataset attempt 1 (Kelly, J, 2021)
-      # Load random forest package
-      install.packages("randomForest")
-      library(randomForest)
-      # load glus library
-      library(gclus)
+wordcloud(ratings_corpus_train, min.freq = 10, random.order = F, colors = c("chartreuse", "cornflowerblue", "darkorange"))
+wordcloud(reviews_corpus_train, min.freq = 10, random.order = F, colors = c("chartreuse", "cornflowerblue", "darkorange"))
       
-      # reload the data
-      reviews_train = DocumentTermMatrix(reviews_corpus_train, list(dictionary = reviews_dict))
-      reviews_train$ratings <-as.factor(reviews_train$ratings)
+# Lets look at the word clouds separated based on if they are 1 or 5 bubbles
       
-      # fit random forest algorithm
-      fit.rf <- randomForest(ratings~.,data=reviews_raw)
+reviews_train = apply(reviews_train, MARGIN = 2, convert_counts)
+reviews_test  = apply(reviews_test, MARGIN = 2, convert_counts)
       
-      # Result inspection
-      fit.rf
+### Obtaining results
+# load library for Naive Bayes
+library (e1071)
       
-      # Variable importance how this is not applicable in this case as we only focused on 
-      
-      varImpPlot(fit.rf)
+reviews_classifier = naiveBayes(reviews_train, reviews_raw_train$ratings)
+reviews_test_pred = predict(reviews_classifier, reviews_test)
       
       
-      CrossTable(reviews_test_pred, reviews_raw_test$ratings, prop.chisq = F, prop.t = F, dnn = c('predicted', 'actual'))
+# results
+install.packages("gmodels")
+library(gmodels)
+CrossTable(reviews_test_pred, reviews_raw_test$ratings, prop.chisq = F, prop.t = F, dnn = c('predicted', 'actual'))
       
-      install.packages("e1071")
-      install.packages("caTools")
-      install.packages("caret")
+### Below we apply the random forest to our dataset attempt 1 (Kelly, J, 2021)
+# Load random forest package
+install.packages("randomForest")
+library(randomForest)
+# load glus library
+library(gclus)
       
-      # Loading package
-      library(e1071)
-      library(caTools)
-      library(caret)
+# reload the data
+reviews_train = DocumentTermMatrix(reviews_corpus_train, list(dictionary = reviews_dict))
+reviews_train$ratings <-as.factor(reviews_train$ratings)
+      
+# fit random forest algorithm
+fit.rf <- randomForest(ratings~.,data=reviews_raw)
+      
+# Result inspection
+fit.rf
+      
+# Variable importance how this is not applicable in this case as we only focused on 
+      
+varImpPlot(fit.rf)
       
       
-      confusionMatrix(reviews_test_pred,reviews_raw_test$ratings)
+CrossTable(reviews_test_pred, reviews_raw_test$ratings, prop.chisq = F, prop.t = F, dnn = c('predicted', 'actual'))
+      
+install.packages("e1071")
+install.packages("caTools")
+install.packages("caret")
+      
+# Loading package
+library(e1071)
+library(caTools)
+library(caret)
       
       
-      # query 2: analysing ratings based on nationality of reviewer
+confusionMatrix(reviews_test_pred,reviews_raw_test$ratings)
       
-      #load file containing country data 
-      reviews<- read.csv(file = "final_zoo.csv", header = TRUE, sep = ",")
-      gsub(".*,","",reviews$country)
       
-      as.data.frame(reviews) 
+# query 2: analysing ratings based on nationality of reviewer
       
-      # looking at the nationality of reviewers using the unique function on the country column and the frequency with which they appear using the unique and count functions
-      unique(reviews$country)
-      reviews_by_country<- aggregate(data.frame(count = reviews$country),    
+#load file containing country data 
+reviews<- read.csv(file = "final_zoo.csv", header = TRUE, sep = ",")
+gsub(".*,","",reviews$country)
+      
+as.data.frame(reviews) 
+      
+# looking at the nationality of reviewers using the unique function on the country column and the frequency with which they appear using the unique and count functions
+unique(reviews$country)
+reviews_by_country<- aggregate(data.frame(count = reviews$country),    
                                      list(value = reviews$country),
                                      length)
-      print(reviews_by_country)
-      # this returned 41 unique results, 40 countries along with those who didn't provide a location
-      # output of most frquently occuring countries
-      # Country		count
-      # United Kingdom	308
-      # Ireland		284
-      # Not listed		214
-      # USA			69
-      # Northern Ireland	28
-      # Canada		20
+print(reviews_by_country)
+# this returned 41 unique results, 40 countries along with those who didn't provide a location
+# output of most frquently occuring countries
+# Country		count
+# United Kingdom	308
+# Ireland		284
+# Not listed		214
+# USA			69
+# Northern Ireland	28
+# Canada		20
       
-      #creating vectors which contain the data pertaining to each specific country above which we have decided is frequent enough to be included
-      Ireland <- subset(reviews, country == "Ireland")
-      nrow(Ireland)
-      Irish<- mean(Ireland$ratings2)
-      
-      
-      Britain <- subset(reviews, country == "United Kingdom")
-      nrow(Britain)
-      British <- mean(Britain$ratings2)
+#creating vectors which contain the data pertaining to each specific country above which we have decided is frequent enough to be included
+Ireland <- subset(reviews, country == "Ireland")
+nrow(Ireland)
+Irish<- mean(Ireland$ratings2)
       
       
-      NI<- subset(reviews, country =="Northern Ireland")
-      N_Irish <- mean(NI$ratings2)
-      unique(reviews$country)
+Britain <- subset(reviews, country == "United Kingdom")
+nrow(Britain)
+British <- mean(Britain$ratings2)
       
       
-      USA<- subset(reviews, country =="USA")
-      American <- mean(USA$ratings2)
+NI<- subset(reviews, country =="Northern Ireland")
+N_Irish <- mean(NI$ratings2)
+unique(reviews$country)
+      
+      
+USA<- subset(reviews, country =="USA")
+American <- mean(USA$ratings2)
       
       
       
-      Canada <- subset(reviews, country == "Canada")
-      Canadian <- mean(Canada$ratings2)
-      review_by_country<- aggregate(data.frame(count = reviews$country),    
+Canada <- subset(reviews, country == "Canada")
+Canadian <- mean(Canada$ratings2)
+review_by_country<- aggregate(data.frame(count = reviews$country),    
                                     list(value = reviews$country),
                                     length)
       
-      # calculating the mean of all reviews for comparison
-      overall_score <- mean(reviews$ratings2)
+# calculating the mean of all reviews for comparison
+overall_score <- mean(reviews$ratings2)
       
-      #creating a table where country score and name are combined
-      scores <- c(Irish, British, N_Irish, American, Canadian, overall_score)
-      country1 <- c("Ireland", "Britain", "Northern_Ireland", "USA", "Canada", "All")
+#creating a table where country score and name are combined
+scores <- c(Irish, British, N_Irish, American, Canadian, overall_score)
+country1 <- c("Ireland", "Britain", "Northern_Ireland", "USA", "Canada", "All")
       
-      names(scores) <- country1
+names(scores) <- country1
       
-      print(scores)
+print(scores)
       
-      # output for average rating
-      #        Ireland          Britain    Northern_Ireland              USA           Canada 		All 
-      #      45.10563         44.18831            46.07143         45.94203         46.50000           44.28428 
+# output for average rating
+#        Ireland          Britain    Northern_Ireland              USA           Canada 		All 
+#      45.10563         44.18831            46.07143         45.94203         46.50000           44.28428 
       
       
-      #section 2: sentiment analysis
+#section 2: sentiment analysis
       
-      #installing required packages
-      knitr::opts_chunk$set(echo = TRUE)
-      install.packages('textdata')
-      install.packages("ggplot2")
+#installing required packages
+knitr::opts_chunk$set(echo = TRUE)
+install.packages('textdata')
+install.packages("ggplot2")
       
-      #load required libraries
-      library(tidyverse)      # data manipulation & plotting
-      library(stringr)        # text cleaning and regular expressions
-      library(tidytext)       # provides additional text mining functions
-      library(textdata)       # Includes sentiment lexicons for classification and analysis.
-      library("ggplot2")      # useful for graph
+#load required libraries
+library(tidyverse)      # data manipulation & plotting
+library(stringr)        # text cleaning and regular expressions
+library(tidytext)       # provides additional text mining functions
+library(textdata)       # Includes sentiment lexicons for classification and analysis.
+library("ggplot2")      # useful for graph
       
-      ## ---------------STEP 2 TIDYING DATA ----------------------------------------------------------------------
+## ---------------STEP 2 TIDYING DATA ----------------------------------------------------------------------
       
-      SentimentAnalysis= read.csv(file="zooreviews.csv", head=TRUE, sep=",") #upload the file
-      sentiments #quick view of the sentiment words group
-      c=SentimentAnalysis$body #converting column into vector
-      text_tb=tibble(c) #converting vector into data frame
+SentimentAnalysis= read.csv(file="zooreviews.csv", head=TRUE, sep=",") #upload the file
+sentiments #quick view of the sentiment words group
+c=SentimentAnalysis$body #converting column into vector
+text_tb=tibble(c) #converting vector into data frame
       
-      text_tb=tibble(ReviewNumber=seq_along(c), text = c) # creating 2 columns
+text_tb=tibble(ReviewNumber=seq_along(c), text = c) # creating 2 columns
       
-      SplitReviews=text_tb %>%
+SplitReviews=text_tb %>%
         unnest_tokens(word, text) # splitting each review by word
-      SplitReviews
+SplitReviews
       
       
-      #--------------------------STEP 3 SENTIMENT ANALYSIS--------------------
-      ----------------#grouping words per type of sentiment-------------------
+#--------------------------STEP 3 SENTIMENT ANALYSIS--------------------
+----------------#grouping words per type of sentiment-------------------
       
-      Sentiment=SplitReviews %>%
-        right_join(get_sentiments("nrc")) %>%
-        filter(!is.na(sentiment)) %>% #filter if not sentiment
-        count(sentiment, sort = TRUE)
-      Sentiment
-      
-      
-      #plotting 
-      plot1=ggplot(Sentiment, aes(x=reorder(sentiment, n), y=n)) + geom_bar(stat="identity", color="white", fill="grey") + labs(title="Frequency sentiment words", y="frequency", x="sentiment word") + coord_flip() # Y axis derived from counts of X item
-      print(plot1)
+Sentiment=SplitReviews %>%
+      right_join(get_sentiments("nrc")) %>%
+      filter(!is.na(sentiment)) %>% #filter if not sentiment
+      count(sentiment, sort = TRUE)
+Sentiment
       
       
-      ----------------#grouping words in negative and positive------------------------ 
-      #counting the number of words and grouping per type of sentiment
-      bing_word_counts <- SplitReviews %>%
+#plotting 
+plot1=ggplot(Sentiment, aes(x=reorder(sentiment, n), y=n)) + geom_bar(stat="identity", color="white", fill="grey") + labs(title="Frequency sentiment words", y="frequency", x="sentiment word") + coord_flip() # Y axis derived from counts of X item
+print(plot1)
+      
+      
+ ----------------#grouping words in negative and positive------------------------ 
+#counting the number of words and grouping per type of sentiment
+bing_word_counts <- SplitReviews %>%
         inner_join(get_sentiments("bing")) %>%
         count(word, sentiment, sort = TRUE) %>%
         ungroup()
       
-      bing_word_counts
+bing_word_counts
       
       
       #graph of sentiment analysis
-      plot2=bing_word_counts %>%
+plot2=bing_word_counts %>%
         group_by(sentiment) %>%
         top_n(10) %>%
         ggplot(aes(reorder(word, n), n, fill = sentiment)) +
@@ -361,10 +361,10 @@ table(reviews_raw$location)
         facet_wrap(~sentiment, scales = "free_y") +
         labs(y = "Contribution to sentiment", x = NULL) +
         coord_flip()
-      print(plot2)
+print(plot2)
       
-      # outputting wordcloud shaped in the letters zoo ---------------------
-      library(wordcloud2)
+# outputting wordcloud shaped in the letters zoo ---------------------
+library(wordcloud2)
       
-      bing_word_counts1 <- bing_word_counts[,-(2),drop=FALSE]
-      letterCloud(bing_word_counts1, word = "ZOO", size=1)
+bing_word_counts1 <- bing_word_counts[,-(2),drop=FALSE]
+letterCloud(bing_word_counts1, word = "ZOO", size=1)
